@@ -1,0 +1,41 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.1' // Fat-jar support
+}
+
+group = 'com.commandos'
+version = '1.0.0'
+sourceCompatibility = '17'
+targetCompatibility = '17'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Core
+    implementation 'org.yaml:snakeyaml:2.2'
+    // Test
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testImplementation 'org.mockito:mockito-core:5.2.0'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging.showStandardStreams = true
+}
+
+application {
+    mainClass = 'com.commandos.ui.ShellLauncher'
+}
+
+shadowJar {
+    archiveBaseName.set('commandos-all')
+    archiveVersion.set('')
+    archiveClassifier.set('')
+    mergeServiceFiles()
+    manifest {
+        attributes 'Main-Class': 'com.commandos.ui.ShellLauncher'
+    }
+}

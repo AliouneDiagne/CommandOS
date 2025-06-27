@@ -1,0 +1,23 @@
+# CommandOS example configuration (rename to config.yml for production)
+users:
+  - username: admin
+    password_hash: $2a$10$7Q6akf7OP7b8odJXwWhUYe0xWDFlD0Q7mE5d7R8f0N8kUuJyjLqzC
+    roles: [admin]
+  - username: guest
+    password_hash: $2a$10$EXAMPLEPLACEHOLDERHASH7mE5d7R8f0N8kUuJyjLqzC
+    roles: [user]
+security:
+  password_algorithm: bcrypt
+  max_login_attempts: 5
+  allow_guest: true
+
+logging:
+  file: data/commandos.log
+  level: INFO
+  rotation: 3
+  max_size_mb: 1
+
+shell:
+  prompt: "CommandOS >>> "
+  history_file: data/history.log
+  language: en

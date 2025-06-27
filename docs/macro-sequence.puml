@@ -1,0 +1,93 @@
+@startuml Macro_Command_Execution_Sequence
+
+' Participants in the sequence
+participant User
+participant Shell
+participant InputSanitizer
+participant CommandFactory
+participant CompositeCommand
+participant PluginLoader
+participant PluginEchoCommand as PluginEcho
+participant CopyCommand
+participant MoveCommand
+participant SingletonLogger as Log
+participant SafeRunner
+
+' User types a macro command
+User -> Shell : types "macro copy in.txt out.txt | plugin:echo OK | move out.txt backup/"
+
+' Shell processes the input
+activate Shell
+  Shell -> InputSanitizer : clean(rawInput)
+  activate InputSanitizer
+    InputSanitizer --> Shell : sanitizedInput
+  deactivate InputSanitizer
+
+  Shell -> CommandFactory : build(sanitizedInput)
+  activate CommandFactory
+    ' CommandFactory identifies it as a macro
+    CommandFactory -> CompositeCommand : parse(sanitizedInput)
+    activate CompositeCommand
+      ' CompositeCommand splits and builds sub-commands
+      CompositeCommand -> CommandFactory : build("copy in.txt out.txt")
+      activate CommandFactory
+        CommandFactory --> CopyCommand : new CopyCommand(...)
+      deactivate CommandFactory
+      CompositeCommand -> CommandFactory : build("plugin:echo OK")
+      activate CommandFactory
+        CommandFactory -> PluginLoader : newInstance("echo", ["plugin", "echo", "OK"])
+        activate PluginLoader
+          PluginLoader --> PluginEcho : new PluginEchoCommand().init(...)
+        deactivate PluginLoader
+        CommandFactory --> PluginEcho : pluginCmd
+      deactivate CommandFactory
+      CompositeCommand -> CommandFactory : build("move out.txt backup/")
+      activate CommandFactory
+        CommandFactory --> MoveCommand : new MoveCommand(...)
+      deactivate CommandFactory
+      CompositeCommand --> Shell : CompositeCommand (macro)
+    deactivate CompositeCommand
+  deactivate CommandFactory
+
+  ' Shell executes the macro command via SafeRunner for safety
+  Shell -> SafeRunner : run(CompositeCommand::execute)
+  activate SafeRunner
+    SafeRunner -> CompositeCommand : execute()
+    activate CompositeCommand
+      loop for each sub-command
+        CompositeCommand -> CopyCommand : execute()
+        activate CopyCommand
+          CopyCommand -> Log : info("Copied in.txt -> out.txt")
+          activate Log
+            Log --> CopyCommand
+          deactivate Log
+          CopyCommand --> CompositeCommand
+        deactivate CopyCommand
+
+        CompositeCommand -> PluginEcho : execute()
+        activate PluginEcho
+          PluginEcho -> Log : info("Plugin says: OK")
+          activate Log
+            Log --> PluginEcho
+          deactivate Log
+          PluginEcho --> CompositeCommand
+        deactivate PluginEcho
+
+        CompositeCommand -> MoveCommand : execute()
+        activate MoveCommand
+          MoveCommand -> Log : info("Moved out.txt -> backup/")
+          activate Log
+            Log --> MoveCommand
+          deactivate Log
+          MoveCommand --> CompositeCommand
+        deactivate MoveCommand
+      end loop
+      CompositeCommand --> SafeRunner
+    deactivate CompositeCommand
+    SafeRunner --> Shell : execution completed (no crash)
+  deactivate SafeRunner
+
+  Shell --> User : displays success message / prompt
+deactivate Shell
+
+@enduml

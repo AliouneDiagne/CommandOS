@@ -1,0 +1,50 @@
+# === IDE ===
+.idea/
+.vscode/
+*.iml
+
+# === Build system ===
+build/
+bin/
+.gradle/
+!gradle/wrapper/gradle-wrapper.properties
+!gradle/wrapper/gradle-wrapper.jar
+
+# === Java compiled files ===
+*.class
+*.jar
+*.war
+*.ear
+
+# === System / backup ===
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+
+# === Plugin cache / examples ===
+plugins/*.jar
+plugins/example-plugin.jar
+my-echo-plugin/build/
+
+# === Local user config ===
+config/*.local.*
+*.env
+
+# === JDK distribuzioni (come OpenJDK-24 localmente) ===
+src/OpenJDK-24/
+
+# === Report / coverage / CI output ===
+reports/
+*.html
+*.xml
+jacoco.exec
+
+# === Test temporary files ===
+test/*.txt
+test/*.log
+
+# === Lock files ===
+*.lock
+*.lck

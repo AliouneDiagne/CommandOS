@@ -1,0 +1,200 @@
+File: docs/class-diagram.puml
+' Purpose: PlantUML script for the CommandOS Class Diagram.
+' Illustrates the main classes, interfaces, and their relationships.
+'
+' Scopo: Script PlantUML per il diagramma delle classi di CommandOS.
+' Illustra le classi principali, le interfacce e le loro relazioni.
+
+@startuml CommandOS_Class_Diagram
+
+' Use ortho lines for cleaner layout
+skinparam linetype ortho
+' Hide empty members to reduce clutter
+hide empty members
+
+title CommandOS - Class Diagram
+
+' Define packages to group related classes logically by responsibility
+package "ui" {
+  class ShellLauncher {
+    + main(String[]): void
+  }
+  class Shell {
+    - currentDirectory: FsNode
+    - authService: AuthService
+    - commandFactory: CommandFactory
+    - logger: SingletonLogger
+    - scanner: Scanner
+    + run(): void
+  }
+  ShellLauncher ..> Shell : creates & runs
+}
+
+package "core" {
+  interface Command <<interface>> {
+    + execute(): void
+    + synopsis(): String
+  }
+  class CommandFactory {
+    + build(String): Command
+    + register(String, Function<String[], Command>): void
+  }
+  class CompositeCommand {
+    - children: List<Command>
+    + parse(String): CompositeCommand
+    + add(Command): void
+    + execute(): void
+  }
+  class HistoryIterator {
+    - history: List<Command>
+    - cursor: int
+    + hasNext(): boolean
+    + next(): Command
+  }
+
+  CommandFactory ..> Command : creates
+  CompositeCommand ..|> Command : implements
+  CompositeCommand "1" o--> "*" Command : contains
+  HistoryIterator ..> Command : iterates
+  Shell ..> CommandFactory : uses
+  Shell ..> Command : executes
+}
+
+package "commands" {
+  class CopyCommand
+  class MoveCommand
+  class HelpCommand
+  class InvalidCommand
+  class UnknownCommand
+
+  CopyCommand ..|> Command : implements
+  MoveCommand ..|> Command : implements
+  HelpCommand ..|> Command : implements
+  InvalidCommand ..|> Command : implements
+  UnknownCommand ..|> Command : implements
+
+  CommandFactory ..> CopyCommand : creates
+  CommandFactory ..> MoveCommand : creates
+  CommandFactory ..> HelpCommand : creates
+  CommandFactory ..> InvalidCommand : creates
+  CommandFactory ..> UnknownCommand : creates
+}
+
+package "fs" {
+  interface FsNode <<interface>> {
+    + getName(): String
+    + getParent(): Optional<FsNode>
+    + isDirectory(): boolean
+    + display(): void
+    + find(String): Optional<FsNode>
+  }
+  class FileLeaf {
+    - name: String
+    - content: String
+    + readContent(): String
+    + writeContent(String): void
+  }
+  class DirComposite {
+    - name: String
+    - children: List<FsNode>
+    + add(FsNode): void
+    + remove(FsNode): void
+    + getChild(String): Optional<FsNode>
+  }
+
+  FileLeaf ..|> FsNode : implements
+  DirComposite ..|> FsNode : implements
+  DirComposite "1" o--> "*" FsNode : contains
+  CommandFactory ..> FsNode : interacts (e.g. for cd, ls)
+}
+
+package "infra" {
+  class SingletonLogger {
+    - instance: SingletonLogger {static}
+    - logger: Logger
+    + getInstance(): SingletonLogger {static}
+    + info(String): void
+    + warn(String): void
+    + severe(String): void
+  }
+  class SafeRunner {
+    + run(Runnable): void {static}
+  }
+  class InputSanitizer {
+    + clean(String): String {static}
+  }
+
+  SingletonLogger -- SafeRunner : used by
+  SingletonLogger -- CommandFactory : used by
+  InputSanitizer -- CommandFactory : used by
+  InputSanitizer -- CopyCommand : used by
+  InputSanitizer -- MoveCommand : used by
+  SafeRunner -- CopyCommand : wraps execution
+  SafeRunner -- MoveCommand : wraps execution
+  Shell ..> SingletonLogger : uses
+  Shell ..> SafeRunner : uses
+  Shell ..> InputSanitizer : uses
+}
+
+package "plugin" {
+  interface Plugin <<interface>> {
+    + name(): String
+    + init(String[]): void
+  }
+  class PluginLoader {
+    + newInstance(String, String[]): Command {static}
+  }
+
+  PluginLoader ..> Plugin : loads
+  PluginLoader ..> Command : creates
+  CommandFactory ..> PluginLoader : uses
+}
+
+package "proc" {
+  class ProcessManager {
+    - executorService: ExecutorService
+    - processes: Map<Integer, Callable<Void>>
+    + startProcess(Callable<Void>): int
+    + killProcess(int): boolean
+    + listProcesses(): Set<Integer>
+  }
+  ProcessManager --> Command : manages processes
+  Shell ..> ProcessManager : uses
+}
+
+package "security" {
+  class AuthService {
+    - config: Config
+    - currentUser: String
+    + login(String, String): boolean
+    + logout(): void
+    + isLoggedIn(): boolean
+  }
+  class Config {
+    - properties: Map<String, Object>
+    + loadConfig(Path): void
+    + getUserPasswordHash(String): String
+    + getUserRoles(String): List<String>
+  }
+
+  AuthService ..> Config : uses
+  Shell ..> AuthService : uses
+}
+
+package "strategy" {
+  interface ExecutionStrategy <<interface>> {
+    + execute(Command): void
+  }
+  class SyncStrategy {
+    + execute(Command): void
+  }
+  class AsyncStrategy {
+    + execute(Command): void
+  }
+  ExecutionStrategy <|.. SyncStrategy : implements
+  ExecutionStrategy <|.. AsyncStrategy : implements
+  AsyncStrategy ..> ProcessManager : uses
+  Shell ..> ExecutionStrategy : uses
+}
+
+@enduml

@@ -1,0 +1,4 @@
+# (vuoto)
+# Questo file .gitkeep serve a garantire che la directory 'data/' sia inclusa nel repository Git
+# anche se inizialmente è vuota. I contenuti generati a runtime (es. commandos.log)
+# saranno ignorati come specificato nel file .gitignore.

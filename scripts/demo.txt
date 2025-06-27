@@ -1,0 +1,64 @@
+# scripts/demo.txt
+# This script demonstrates core functionalities of CommandOS.
+# You can execute it via: java -jar build/libs/commandos-all.jar < scripts/demo.txt
+
+echo "=== Starting CommandOS Demo ==="
+
+# 1. Login to the system
+login admin
+admin123 # Password will be prompted, this line is for automated input only.
+
+# 2. Explore Help Command
+help
+help copy
+
+# 3. Create and navigate virtual filesystem
+mkdir my_project
+cd my_project
+ls
+
+# 4. Create and manage files
+echo "This is the first line of my awesome project." > file1.txt
+echo "This is the second line." >> file1.txt # Append text
+cat file1.txt
+copy file1.txt backup_file.txt
+ls
+
+# 5. Demonstrate basic Move command
+move file1.txt subfolder/file1.txt # This will fail if subfolder doesn't exist, showing error handling.
+mkdir subfolder
+move file1.txt subfolder/file1.txt
+ls subfolder/
+
+# 6. Use a dummy plugin (assuming EchoPlugin is loaded)
+# Make sure 'example-plugin.jar' is in the 'plugins/' directory
+plugin:echo "Hello from CommandOS plugin system!"
+
+# 7. Execute a chained macro command
+# This demonstrates Composite Pattern in action, chaining copy, plugin call, and move
+macro \
+  copy backup_file.txt final_report.txt | \
+  plugin:echo "Report finalized and moved!" | \
+  move final_report.txt /archive/final_report_moved.txt
+
+# 8. Verify results
+ls
+ls subfolder/
+ls /archive/ # Assuming /archive/ exists or is created virtually
+
+# 9. Clean up created files/directories
+rm backup_file.txt
+rm -r subfolder
+rm /archive/final_report_moved.txt # Clean up the moved file
+rm file1.txt # If it wasn't moved, remove it here.
+
+# 10. Logout from the system
+logout
+
+echo "=== CommandOS Demo Completed ==="
+
+keep_pin
+Salva nella nota
+copy_all
+thumb_up
+thumb_down

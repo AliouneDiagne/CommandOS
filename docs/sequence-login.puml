@@ -1,0 +1,48 @@
+@startuml User_Login_Filesystem_Logout_Sequence
+
+actor User
+participant Shell
+participant InputSanitizer
+participant CommandFactory
+participant AuthService
+participant SingletonLogger
+participant DirComposite
+participant MkdirCommand
+participant LsCommand
+participant CatCommand
+
+User -> Shell : "login admin admin123"
+Shell -> InputSanitizer : clean(...)
+Shell -> CommandFactory : build(...)
+CommandFactory -> AuthService : authenticate(...)
+AuthService -> SingletonLogger : info(...)
+alt Authentication Success
+    Shell -> LoginCommand : execute()
+    LoginCommand -> SingletonLogger : info(...)
+else Authentication Failure
+    Shell -> InvalidCommand : execute()
+    InvalidCommand -> SingletonLogger : warn(...)
+end
+
+User -> Shell : "mkdir my_project"
+Shell -> InputSanitizer : clean(...)
+Shell -> CommandFactory : build(...)
+CommandFactory -> MkdirCommand : new(...)
+Shell -> MkdirCommand : execute()
+MkdirCommand -> DirComposite : createDirectory(...)
+MkdirCommand -> SingletonLogger : info(...)
+
+User -> Shell : "ls"
+Shell -> CommandFactory : build(...)
+Shell -> LsCommand : execute()
+LsCommand -> DirComposite : listChildren()
+LsCommand -> SingletonLogger : info(...)
+
+User -> Shell : "logout"
+Shell -> CommandFactory : build(...)
+Shell -> LogoutCommand : execute()
+LogoutCommand -> AuthService : logout()
+AuthService -> SingletonLogger : info(...)
+Shell -> User : "Logged out successfully."
+
+@enduml

@@ -1,0 +1,5 @@
+# (vuoto)
+# Questo file .gitkeep serve a garantire che la directory 'plugins/' sia inclusa nel repository Git
+# anche se inizialmente è vuota. I file JAR dei plugin verranno inseriti qui dall'utente,
+# o copiati durante il deployment.
+# Un esempio di plugin (example-plugin.jar) può essere aggiunto per la demo.
