@@ -1,0 +1,97 @@
+@startuml CommandOS_Class_Diagram
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/Cicon-PlantUML/master/Cicon-Common.puml
+
+package "com.commandos.core" {
+    interface Command
+    class CommandFactory
+    class CompositeCommand
+    class HistoryIterator
+}
+
+package "com.commandos.commands" {
+    class CopyCommand
+    class MoveCommand
+    class HelpCommand
+    class InvalidCommand
+    class UnknownCommand
+}
+
+package "com.commandos.fs" {
+    interface FsNode
+    class FileLeaf
+    class DirComposite
+}
+
+package "com.commandos.infra" {
+    class SingletonLogger
+    class SafeRunner
+    class InputSanitizer
+}
+
+package "com.commandos.plugin" {
+    class PluginLoader
+}
+
+package "com.commandos.proc" {
+    class ProcessManager
+}
+
+package "com.commandos.strategy" {
+    interface ExecutionStrategy
+    class SyncStrategy
+    class AsyncStrategy
+}
+
+package "com.commandos.security" {
+    class AuthService
+    class Config
+}
+
+package "com.commandos.ui" {
+    class Shell
+    class ShellLauncher
+    class LogWindow
+}
+
+Command <|.. CopyCommand
+Command <|.. MoveCommand
+Command <|.. HelpCommand
+Command <|.. InvalidCommand
+Command <|.. UnknownCommand
+Command <|.. CompositeCommand
+
+CommandFactory --> Command
+CommandFactory ..> PluginLoader
+CommandFactory ..> InputSanitizer
+CommandFactory ..> SingletonLogger
+
+CompositeCommand "1" *-- "0..*" Command
+
+FsNode <|.. FileLeaf
+FsNode <|.. DirComposite
+DirComposite "1" *-- "0..*" FsNode
+
+HistoryIterator o-- Command
+
+SafeRunner ..> SingletonLogger
+Shell ..> SafeRunner
+Shell ..> CommandFactory
+Shell ..> InputSanitizer
+Shell ..> ExecutionStrategy
+
+SingletonLogger -- Config
+AuthService -- Config
+AuthService -- SingletonLogger
+
+LogWindow ..> SingletonLogger
+
+ProcessManager ..> SingletonLogger
+ExecutionStrategy <|.. SyncStrategy
+ExecutionStrategy <|.. AsyncStrategy
+AsyncStrategy ..> ProcessManager
+
+PluginLoader ..> Command
+PluginLoader ..> SingletonLogger
+
+ShellLauncher --> Shell
+@enduml

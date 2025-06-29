@@ -1,0 +1,55 @@
+@startuml Macro_With_Plugin_Execution_Sequence
+
+actor User
+participant Shell
+participant InputSanitizer
+participant CommandFactory
+participant CompositeCommand
+participant PluginLoader
+participant CopyCommand
+participant PluginEchoCommand
+participant MoveCommand
+participant SafeRunner
+participant SingletonLogger
+
+User -> Shell : "macro copy a.txt b.txt | plugin:echo Hello | move b.txt backup/"
+Shell -> InputSanitizer : clean(input)
+InputSanitizer --> Shell : sanitized_input
+Shell -> CommandFactory : build(sanitized_input)
+CommandFactory -> CompositeCommand : parse(sanitized_input)
+
+CompositeCommand -> CommandFactory : build("copy a.txt b.txt")
+CommandFactory --> CompositeCommand : CopyCommand_instance
+
+CompositeCommand -> CommandFactory : build("plugin:echo Hello")
+CommandFactory -> PluginLoader : newInstance("echo", ...)
+PluginLoader --> CommandFactory : PluginEchoCommand_instance
+CommandFactory --> CompositeCommand : PluginEchoCommand_instance
+
+CompositeCommand -> CommandFactory : build("move b.txt backup/")
+CommandFactory --> CompositeCommand : MoveCommand_instance
+
+CommandFactory --> Shell : CompositeCommand_instance_ready
+Shell -> SafeRunner : run(() -> CompositeCommand.execute())
+SafeRunner -> CompositeCommand : execute()
+
+CompositeCommand -> CopyCommand : execute()
+CopyCommand -> SingletonLogger : info(...)
+CopyCommand --> CompositeCommand
+
+CompositeCommand -> PluginEchoCommand : execute()
+PluginEchoCommand -> SingletonLogger : info(...)
+PluginEchoCommand --> CompositeCommand
+
+CompositeCommand -> MoveCommand : execute()
+MoveCommand -> SingletonLogger : info(...)
+MoveCommand --> CompositeCommand
+
+SafeRunner --> Shell
+Shell -> User : "Macro executed successfully."
+
+note over Shell
+  Exceptions are caught by SafeRunner and logged.
+end note
+
+@enduml

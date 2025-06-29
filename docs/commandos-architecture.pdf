@@ -1,0 +1,55 @@
+@startuml CommandOS_Architecture
+
+title CommandOS – Architettura Modulare
+
+package "com.commandos.core" {
+  [Shell] --> [CommandFactory]
+  [Shell] --> [SafeRunner]
+  [Shell] --> [HistoryIterator]
+  [CommandFactory] --> [Command]
+  [Command] <|-- [CopyCommand]
+  [Command] <|-- [MoveCommand]
+  [Command] <|-- [MacroCommand]
+}
+
+package "com.commandos.fs" {
+  [Command] --> [DirComposite]
+  [DirComposite] *-- [FileLeaf]
+  [DirComposite] ..> [FsIterator]
+}
+
+package "com.commandos.infra" {
+  [SafeRunner] --> [SingletonLogger]
+  [InputSanitizer] --> [SingletonLogger]
+  [CommandFactory] --> [InputSanitizer]
+  [Shell] --> [InputSanitizer]
+}
+
+package "com.commandos.plugin" {
+  [CommandFactory] ..> [PluginLoader]
+  [PluginLoader] --> [Command] : load via SPI
+}
+
+package "com.commandos.security" {
+  [Shell] --> [AuthService]
+  [AuthService] --> [Config]
+  [AuthService] --> [SingletonLogger]
+}
+
+package "com.commandos.proc" {
+  [Shell] --> [ProcessManager]
+  [AsyncStrategy] --> [ProcessManager]
+}
+
+package "com.commandos.strategy" {
+  [Shell] --> [ExecutionStrategy]
+  [ExecutionStrategy] <|-- [SyncStrategy]
+  [ExecutionStrategy] <|-- [AsyncStrategy]
+}
+
+package "com.commandos.ui" {
+  [ShellLauncher] --> [Shell]
+  [LogWindow] --> [SingletonLogger]
+}
+
+@enduml

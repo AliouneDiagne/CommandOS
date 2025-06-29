@@ -1,0 +1,157 @@
+Perfetto! Di seguito trovi il tuo `README.md` già formattato in **Markdown pulito e tecnico**, pronto per essere:
+
+* **stampato** o
+* **convertito in PDF** con Pandoc o qualunque tool Markdown → PDF.
+
+---
+
+### ✅ Puoi copiarlo in un file:
+
+`docs/README_ITA.md`
+E poi generare il PDF con:
+
+```powershell
+pandoc docs/README_ITA.md -o docs/README_ITA.pdf
+```
+
+---
+
+## 📄 Contenuto `README_ITA.md` (Markdown pulito, completo, in italiano)
+
+```markdown
+# CommandOS – Shell Testuale in Java
+
+CommandOS è un'applicazione Java SE interamente basata su riga di comando (CLI) che simula le funzionalità essenziali di un sistema operativo.  
+Il sistema include gestione utenti, file system virtuale, esecuzione comandi, logging, estensibilità tramite plugin e protezioni di sicurezza.
+
+---
+
+## Funzionalità principali
+
+- Comandi UNIX-like (`copy`, `move`, `mkdir`, `cat`, `ls`, `ps`, `kill`, `login`, `logout`, ecc.)
+- Macro-comandi (`macro copy file1 file2 | move file2 backup/`)
+- Filesystem virtuale ad albero (`DirComposite`, `FileLeaf`)
+- Logging automatico su file (`commandos.log`)
+- Gestione utenti con permessi
+- Simulazione di processi (`ProcessManager`, `ThreadPool`)
+- Estensione via plugin (`PluginLoader`, `ServiceLoader`)
+- Sanitizzazione input e gestione eccezioni controllata
+- Suite di test unitari (JUnit 5 + Mockito)
+
+---
+
+## Design Pattern implementati
+
+- **Factory**: `CommandFactory` per creazione centralizzata dei comandi
+- **Composite**: `CompositeCommand` per macro e `DirComposite` per filesystem
+- **Iterator**: `HistoryIterator` e `FsIterator`
+- **Exception Shielding**: `SafeRunner.run()` per schermare errori
+- **Singleton**: `SingletonLogger`, `Config`
+- **Strategy**: `ExecutionStrategy` (esecuzioni sync / async)
+- **Builder**: `CompositeCommand.Builder`
+- **Adapter**: `LegacyCmdAdapter`
+
+---
+
+## Tecnologie Java utilizzate
+
+- Java 17+
+- Collections Framework (`List`, `Map`, `Set`)
+- Generics
+- Java I/O / NIO2
+- Logging (`java.util.logging`)
+- JUnit 5, Mockito
+
+---
+
+## Struttura del progetto
+
+```
+
+CommandOS/
+├── core/         # Comandi, Factory, Composite, Iterator
+├── commands/     # Implementazioni: Copy, Move, Help, ecc.
+├── fs/           # Filesystem virtuale
+├── infra/        # Logging, SafeRunner, sanitizzazione
+├── proc/         # Gestione processi
+├── plugin/       # Caricamento comandi da .jar esterni
+├── security/     # Login, autorizzazioni
+├── ui/           # Shell CLI
+├── test/         # Test JUnit
+├── docs/         # UML e README
+├── data/         # Log runtime
+├── plugins/      # Plugin esterni
+├── scripts/      # Macro/demo
+
+````
+
+---
+
+## Come eseguire
+
+### Prerequisiti
+
+- JDK 17 o superiore
+- Gradle (consigliato) o Maven
+
+### Compilazione
+
+```bash
+./gradlew shadowJar
+````
+
+### Avvio CLI
+
+```bash
+java -jar build/libs/commandos-all.jar
+```
+
+oppure
+
+```bash
+mvn exec:java -Dexec.mainClass="app.Main"
+```
+
+---
+
+## Esempi di comandi
+
+```bash
+login admin
+mkdir progetti
+cd progetti
+touch note.txt
+echo "Contenuto" > note.txt
+cat note.txt
+chmod 600 note.txt
+ls -la
+ps
+kill 101
+macro copy note.txt copia.txt | move copia.txt backup/
+help
+logout
+exit
+```
+
+---
+
+## Sicurezza
+
+| Aspetto                 | Dettagli                                                       |
+| ----------------------- | -------------------------------------------------------------- |
+| Sanitizzazione input    | `InputSanitizer.clean()` su ogni token                         |
+| Exception shielding     | `SafeRunner.run()` blocca crash e logga in modo controllato    |
+| Nessun secret hardcoded | Percorsi e credenziali letti da file di configurazione esterni |
+| Logging sicuro          | Logger centralizzato su file, separato dall’output utente      |
+
+---
+
+## Documentazione
+
+* `README_ITA.md`: questa documentazione tecnica
+* `commandos-architecture.pdf`: architettura e pattern usati
+* `*.puml`: diagrammi UML generabili via PlantUML
+* `scripts/demo.txt`: comandi demo macro
+
+```
+

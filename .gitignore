@@ -1,0 +1,26 @@
+# Build outputs
+/.gradle/
+/build/
+/out/
+/target/
+
+# IDE configs
+/.idea/
+/*.iml
+/.vscode/
+.history/
+
+# Runtime files
+*.log
+/data/
+/plugins/*.jar
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# ShadowJar output
+/commandos-all*.jar
+
+# GraalVM native image
+/native-image.properties*

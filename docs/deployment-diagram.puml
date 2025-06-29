@@ -1,0 +1,70 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/Cicon-PlantUML/master/Cicon-Common.puml
+
+node "User Machine / Server" as Host {
+  component "CommandOS CLI Application" as CommandOS_App {
+    folder "Core Logic" as Core {
+      component "Shell" as Shell
+      component "Command Factory" as CommandFactory
+      component "Command Implementations" as Commands
+      component "Virtual Filesystem" as VFS
+      component "Process Manager" as ProcManager
+      component "Auth Service" as Auth
+    }
+
+    folder "Infrastructure" as Infra {
+      component "Singleton Logger" as Logger
+      component "Safe Runner" as SafeRunner
+      component "Input Sanitizer" as Sanitizer
+    }
+
+    folder "Plugins Directory" as PluginsDir {
+      artifact "example-plugin.jar" as PluginJar
+    }
+
+    folder "Configuration & Data" as ConfigData {
+      file "config.yml" as ConfigFile
+      file "commandos.log" as LogFile
+      file "user_history.log" as HistoryLogFile
+    }
+
+    folder "Optional GUI" as GUI {
+      component "Log Window (Swing)" as LogWindow
+    }
+  }
+}
+
+database "External Config Store" as ExternalConfigDB {
+  storage "User Credentials" as UserCreds
+  storage "Application Settings" as AppSettings
+}
+
+' Main flow
+User(User) -- Shell : CLI
+Shell -- CommandFactory : build()
+CommandFactory -- Commands
+Shell -- SafeRunner
+Shell -- Sanitizer
+Shell -- VFS
+Shell -- Auth
+Shell -- ProcManager
+
+SafeRunner -- Logger
+Logger -- LogFile
+Logger -- HistoryLogFile
+Sanitizer -- Logger
+
+VFS -- ConfigData
+Auth -- ConfigFile
+Auth ..> ExternalConfigDB
+
+CommandFactory ..> PluginsDir
+PluginLoader(PluginLoader) -- PluginsDir
+PluginLoader --> Commands
+
+LogWindow -- Logger
+
+ConfigFile -- UserCreds
+ConfigFile -- AppSettings
+ExternalConfigDB .. Host
+@enduml

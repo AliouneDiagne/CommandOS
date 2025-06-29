@@ -1,0 +1,23 @@
+# Sample demo script for CommandOS
+
+mkdir demo_folder
+cd demo_folder
+echo "Hello from CommandOS!" > hello.txt
+ls
+copy hello.txt backup.txt
+mkdir archives
+move backup.txt archives/
+ls archives/
+cat archives/backup.txt
+
+plugin:echo "This is a message from an external plugin!"
+
+macro copy hello.txt temp_file.txt | plugin:echo "Macro step 1: File copied and plugin echoed!" | move temp_file.txt final_destination.txt
+
+ls
+login admin password123
+logout
+
+help
+help m
+exit

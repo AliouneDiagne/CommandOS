@@ -1,0 +1,1 @@
+# Ensures that the 'data/' directory is versioned even when empty.
